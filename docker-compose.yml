@@ -5,11 +5,8 @@ services:
         ports:
             - "80:80"
             - "443:443"
-        args:
-            - DOMAIN_LIST=example-one.com,example-two.com
         volumes:
             - ./nginx/config/conf.d/prod:/etc/nginx/conf.d
-            - letsencrypt:/etc/letsencrypt
         restart: always
     myadmin:
         image: phpmyadmin/phpmyadmin
