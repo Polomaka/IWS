@@ -1,0 +1,48 @@
+version: '3'
+services:
+    web:
+        image: nginx:latest
+        ports:
+            - "80:80"
+            - "443:443"
+        args:
+            - DOMAIN_LIST=example-one.com,example-two.com
+        volumes:
+            - ./nginx/config/conf.d/prod:/etc/nginx/conf.d
+            - letsencrypt:/etc/letsencrypt
+        restart: always
+    myadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        ports:
+            - "8080:80"
+    mysql:
+        image: mariadb
+        ports:
+            - '3306:3306'
+        volumes:
+        - ./db-data:/var/lib/mysql
+        environment:
+        - MYSQL_ROOT_PASSWORD=RootP@ssword
+        restart: always
+    wordpress:
+        image: wordpress:4.7.1-php7.0-fpm
+        ports:
+            - '9000:9000'
+        volumes:
+            - ./wordpress:/var/www/html
+        environment:
+            - WORDPRESS_DB_NAME=wpdb
+            - WORDPRESS_TABLE_PREFIX=wp_
+            - WORDPRESS_DB_HOST=mysql
+            - WORDPRESS_DB_PASSWORD=P@ssword
+        links:
+            - mysql
+        restart: always
+    certbot:
+        image: certbot/certbot
+        container_name: certbot
+        volumes: 
+            - ./certbot/conf:/etc/letsencrypt
+            - ./certbot/www:/var/www/certbot
+        command: certonly --webroot -w /var/www/certbot --force-renewal --email {email} -d {domain} --agree-tos
